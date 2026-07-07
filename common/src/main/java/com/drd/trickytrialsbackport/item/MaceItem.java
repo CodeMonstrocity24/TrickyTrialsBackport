@@ -112,6 +112,8 @@ public class MaceItem extends Item {
             attacker.resetFallDistance();
         }
 
+        stack.hurtAndBreak(1, attacker, e -> e.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+
         return super.hurtEnemy(stack, target, attacker);
     }
 
@@ -184,5 +186,13 @@ public class MaceItem extends Item {
     @Override
     public boolean isValidRepairItem(ItemStack toRepair, ItemStack repair) {
         return repair.is(ModItems.BREEZE_ROD.get()) || super.isValidRepairItem(toRepair, repair);
+    }
+
+    @Override
+    public boolean mineBlock(ItemStack stack, Level level, net.minecraft.world.level.block.state.BlockState state, net.minecraft.core.BlockPos pos, LivingEntity miner) {
+        if (!level.isClientSide && state.getDestroySpeed(level, pos) != 0.0F) {
+            stack.hurtAndBreak(2, miner, e -> e.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+        }
+        return true;
     }
 }
