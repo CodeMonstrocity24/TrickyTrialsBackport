@@ -69,9 +69,15 @@ public final class TrickyTrialsBackportForge {
 
         if (!entity.hasEffect(ModEffects.INFESTED.get())) return;
 
+        // Vanilla immunities: silverfish + bosses.
+        if (entity instanceof net.minecraft.world.entity.monster.Silverfish
+                || isEffectImmuneBoss(entity)) {
+            return;
+        }
+
         if (entity.getRandom().nextFloat() > 0.1f) return;
 
-        int count = 1 + entity.getRandom().nextInt(3);
+        int count = 1 + entity.getRandom().nextInt(2); // vanilla: 1-2 silverfish
 
         for (int i = 0; i < count; i++) {
             InfestedEffect.spawnSilverfish(entity.level(), entity);
@@ -86,6 +92,9 @@ public final class TrickyTrialsBackportForge {
 
         MobEffect effect = inst.getEffect();
         if (!(effect instanceof OozingEffect oozing)) return;
+
+        // Vanilla immunities: slimes + bosses.
+        if (entity instanceof Slime || isEffectImmuneBoss(entity)) return;
 
         Level level = entity.level();
         RandomSource random = entity.getRandom();
@@ -114,6 +123,9 @@ public final class TrickyTrialsBackportForge {
         MobEffect effect = inst.getEffect();
         if (!(effect instanceof WeavingEffect weaving)) return;
 
+        // Vanilla immunities: bosses.
+        if (isEffectImmuneBoss(entity)) return;
+
         Level level = entity.level();
         RandomSource random = entity.getRandom();
 
@@ -132,7 +144,15 @@ public final class TrickyTrialsBackportForge {
         MobEffectInstance inst = entity.getEffect(ModEffects.WIND_CHARGED.get());
         if (inst == null) return;
 
+        // Vanilla immunities: bosses.
+        if (isEffectImmuneBoss(entity)) return;
+
         WindChargedEffect.explodeWindCharge(entity);
+    }
+
+    private static boolean isEffectImmuneBoss(LivingEntity entity) {
+        return entity instanceof net.minecraft.world.entity.boss.wither.WitherBoss
+                || entity instanceof net.minecraft.world.entity.boss.enderdragon.EnderDragon;
     }
 
     @Mod.EventBusSubscriber(modid = TrickyTrialsBackport.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)

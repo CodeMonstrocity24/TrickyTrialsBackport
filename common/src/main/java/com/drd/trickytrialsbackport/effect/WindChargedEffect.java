@@ -1,6 +1,5 @@
 package com.drd.trickytrialsbackport.effect;
 
-import com.drd.trickytrialsbackport.effect.util.WindBurstDamageCalculator;
 import com.drd.trickytrialsbackport.registry.ModParticles;
 import com.drd.trickytrialsbackport.registry.ModSounds;
 import net.minecraft.server.level.ServerLevel;
@@ -9,7 +8,6 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 
@@ -26,21 +24,7 @@ public class WindChargedEffect extends MobEffect {
         double y = entity.getY() + entity.getBbHeight() / 2.0F;
         double z = entity.getZ();
 
-        float power = 3.0F + entity.getRandom().nextFloat() * 2.0F;
-
-        Explosion explosion = serverLevel.explode(
-                entity,
-                null,
-                new WindBurstDamageCalculator(),
-                x, y, z,
-                power,
-                false,
-                Level.ExplosionInteraction.MOB
-        );
-
-        explosion.clearToBlow();
-
-        double radius = power * 2.0;
+        double radius = 3.5;
         AABB box = new AABB(x - radius, y - radius, z - radius, x + radius, y + radius, z + radius);
 
         for (Entity target : level.getEntities(entity, box)) {
@@ -49,10 +33,19 @@ public class WindChargedEffect extends MobEffect {
                 double dz = living.getZ() - z;
                 double dist = Math.sqrt(dx * dx + dz * dz);
 
-                if (dist > 0.001) {
-                    double strength = 2.5;
-                    living.push(dx / dist * strength, 0.5, dz / dist * strength);
+                if (dist > radius) continue;
+
+                double falloff = 1.0 - dist / radius;
+                double strength = falloff * 1.2;
+                double upward = 0.4 * falloff + 0.15;
+
+                if (dist < 0.001) {
+                    // Standing on/at the burst center: launch straight up.
+                    living.push(0.0, Math.max(upward, 0.5), 0.0);
+                } else {
+                    living.push(dx / dist * strength, upward, dz / dist * strength);
                 }
+                living.hurtMarked = true;
             }
         }
 

@@ -59,7 +59,13 @@ public final class TrickyTrialsBackportFabric implements ModInitializer {
                 return InteractionResult.PASS;
             }
 
-            if (!living.hasEffect(ModEffects.INFESTED.get())) {
+           if (!living.hasEffect(ModEffects.INFESTED.get())) {
+                return InteractionResult.PASS;
+            }
+
+            // Add silverfish + boss immunities
+            if (living instanceof net.minecraft.world.entity.monster.Silverfish
+                    || isEffectImmuneBoss(living)) {
                 return InteractionResult.PASS;
             }
 
@@ -67,7 +73,7 @@ public final class TrickyTrialsBackportFabric implements ModInitializer {
                 return InteractionResult.PASS;
             }
 
-            int count = 1 + living.getRandom().nextInt(3);
+            int count = 1 + living.getRandom().nextInt(2); // Vanilla: 1-2 silverfish
 
             for (int i = 0; i < count; i++) {
                 InfestedEffect.spawnSilverfish(living.level(), living);
@@ -82,6 +88,9 @@ public final class TrickyTrialsBackportFabric implements ModInitializer {
 
             MobEffect effect = inst.getEffect();
             if (!(effect instanceof OozingEffect oozing)) return;
+
+            // Add slime + boss immunities
+            if (entity instanceof Slime || isEffectImmuneBoss(entity)) return;
 
             Level level = entity.level();
             RandomSource random = entity.getRandom();
@@ -109,6 +118,9 @@ public final class TrickyTrialsBackportFabric implements ModInitializer {
             MobEffect effect = inst.getEffect();
             if (!(effect instanceof WeavingEffect weaving)) return;
 
+            // Add bosses immunity
+            if (isEffectImmuneBoss(entity)) return;
+
             Level level = entity.level();
             RandomSource random = entity.getRandom();
 
@@ -124,6 +136,9 @@ public final class TrickyTrialsBackportFabric implements ModInitializer {
         ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
             MobEffectInstance inst = entity.getEffect(ModEffects.WIND_CHARGED.get());
             if (inst == null) return;
+
+            // Add boss immunities
+            if (isEffectImmuneBoss(entity)) return;
 
             WindChargedEffect.explodeWindCharge(entity);
         });
@@ -141,5 +156,10 @@ public final class TrickyTrialsBackportFabric implements ModInitializer {
         });
 
         WindChargeTracker.init();
+    }
+
+    private static boolean isEffectImmuneBoss(LivingEntity entity) {
+        return entity instanceof net.minecraft.world.entity.boss.wither.WitherBoss
+                || entity instanceof net.minecraft.world.entity.boss.enderdragon.EnderDragon;
     }
 }
