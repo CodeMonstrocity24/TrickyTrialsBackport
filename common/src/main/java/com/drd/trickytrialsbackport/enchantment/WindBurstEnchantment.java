@@ -3,7 +3,6 @@ package com.drd.trickytrialsbackport.enchantment;
 import com.drd.trickytrialsbackport.registry.ModItems;
 import com.drd.trickytrialsbackport.registry.ModParticles;
 import com.drd.trickytrialsbackport.registry.ModSounds;
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
@@ -12,11 +11,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Explosion;
-import net.minecraft.world.level.ExplosionDamageCalculator;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -41,19 +35,12 @@ public class WindBurstEnchantment extends Enchantment {
 
         float knockbackPower = 0.25F + 0.25F * level;
 
-        Explosion explosion = server.explode(
-                null,
-                null,
-                new NoBlockDamageCalculator(),
-                attacker.getX(),
-                attacker.getY(),
-                attacker.getZ(),
-                3.5F,
-                false,
-                Level.ExplosionInteraction.MOB
-        );
-
-        explosion.clearToBlow();
+        double launch = 0.68D + 0.52D * level;
+        Vec3 dm = attacker.getDeltaMovement();
+        attacker.setDeltaMovement(dm.x, Math.max(dm.y, launch), dm.z);
+        attacker.hasImpulse = true;
+        attacker.hurtMarked = true;
+        attacker.resetFallDistance();
 
         applyWindBurstKnockback(server, attacker, knockbackPower);
 
@@ -79,13 +66,6 @@ public class WindBurstEnchantment extends Enchantment {
                     living.push(push.x, 0.5F, push.z);
                 }
             }
-        }
-    }
-
-    public static class NoBlockDamageCalculator extends ExplosionDamageCalculator {
-        @Override
-        public boolean shouldBlockExplode(Explosion explosion, BlockGetter level, BlockPos pos, BlockState state, float power) {
-            return false;
         }
     }
 }
