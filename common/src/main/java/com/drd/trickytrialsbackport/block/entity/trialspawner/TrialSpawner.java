@@ -200,51 +200,47 @@ public final class TrialSpawner {
                 } else {
                     BlockPos blockPos = BlockPos.containing(spawnPos);
 
-                    if (!SpawnPlacements.checkSpawnRules(type.get(), level, MobSpawnType.SPAWNER, blockPos, random)) {
+                    Entity entity = EntityType.loadEntityRecursive(entityTag, level, e -> {
+                        e.moveTo(x, y, z, random.nextFloat() * 360.0F, 0.0F);
+                        return e;
+                    });
+
+                    if (entity == null) {
                         return Optional.empty();
                     } else {
-                        Entity entity = EntityType.loadEntityRecursive(entityTag, level, e -> {
-                            e.moveTo(x, y, z, random.nextFloat() * 360.0F, 0.0F);
-                            return e;
-                        });
+                        if (entity instanceof Mob mob) {
+                            if (!mob.checkSpawnObstruction(level)) {
+                                return Optional.empty();
+                            }
 
-                        if (entity == null) {
+                            boolean simple = spawnData.getEntityToSpawn().size() == 1
+                                    && spawnData.getEntityToSpawn().contains("id", 8);
+
+                            if (simple) {
+                                mob.finalizeSpawn(
+                                        level,
+                                        level.getCurrentDifficultyAt(mob.blockPosition()),
+                                        MobSpawnType.SPAWNER,
+                                        null,
+                                        null
+                                );
+                            }
+
+                            mob.setPersistenceRequired();
+                        }
+
+                        if (!level.tryAddFreshEntityWithPassengers(entity)) {
                             return Optional.empty();
                         } else {
-                            if (entity instanceof Mob mob) {
-                                if (!mob.checkSpawnObstruction(level)) {
-                                    return Optional.empty();
-                                }
+                            TrialSpawner.FlameParticle flame = this.isOminous
+                                    ? TrialSpawner.FlameParticle.OMINOUS
+                                    : TrialSpawner.FlameParticle.NORMAL;
 
-                                boolean simple = spawnData.getEntityToSpawn().size() == 1
-                                        && spawnData.getEntityToSpawn().contains("id", 8);
+                            level.levelEvent(3011, spawnerPos, flame.encode());
+                            level.levelEvent(3012, blockPos, flame.encode());
+                            level.gameEvent(entity, GameEvent.ENTITY_PLACE, blockPos);
 
-                                if (simple) {
-                                    mob.finalizeSpawn(
-                                            level,
-                                            level.getCurrentDifficultyAt(mob.blockPosition()),
-                                            MobSpawnType.SPAWNER,
-                                            null,
-                                            null
-                                    );
-                                }
-
-                                mob.setPersistenceRequired();
-                            }
-
-                            if (!level.tryAddFreshEntityWithPassengers(entity)) {
-                                return Optional.empty();
-                            } else {
-                                TrialSpawner.FlameParticle flame = this.isOminous
-                                        ? TrialSpawner.FlameParticle.OMINOUS
-                                        : TrialSpawner.FlameParticle.NORMAL;
-
-                                level.levelEvent(3011, spawnerPos, flame.encode());
-                                level.levelEvent(3012, blockPos, flame.encode());
-                                level.gameEvent(entity, GameEvent.ENTITY_PLACE, blockPos);
-
-                                return Optional.of(entity.getUUID());
-                            }
+                            return Optional.of(entity.getUUID());
                         }
                     }
                 }

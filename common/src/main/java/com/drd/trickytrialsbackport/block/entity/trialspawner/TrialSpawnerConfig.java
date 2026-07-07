@@ -58,12 +58,12 @@ public record TrialSpawnerConfig(int spawnRange, float totalMobs, float simultan
                         : null;
 
         return new TrialSpawnerConfig(
-                tag.getInt("spawn_range"),
-                tag.getFloat("total_mobs"),
-                tag.getFloat("simultaneous_mobs"),
-                tag.getFloat("total_mobs_added_per_player"),
-                tag.getFloat("simultaneous_mobs_added_per_player"),
-                tag.getInt("ticks_between_spawn"),
+                tag.contains("spawn_range") ? tag.getInt("spawn_range") : 4,
+                tag.contains("total_mobs") ? tag.getFloat("total_mobs") : 6.0F,
+                tag.contains("simultaneous_mobs") ? tag.getFloat("simultaneous_mobs") : 2.0F,
+                tag.contains("total_mobs_added_per_player") ? tag.getFloat("total_mobs_added_per_player") : 2.0F,
+                tag.contains("simultaneous_mobs_added_per_player") ? tag.getFloat("simultaneous_mobs_added_per_player") : 1.0F,
+                tag.contains("ticks_between_spawn") ? tag.getInt("ticks_between_spawn") : 40,
                 spawnPotentialsDefinition,
                 lootTablesToEject,
                 itemsToDropWhenOminous
