@@ -15,6 +15,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.core.BlockPos;
 
 public class BreezeWindCharge extends ThrowableProjectile {
     private static final float EXPLOSION_RADIUS = 1.2F;
@@ -103,6 +104,10 @@ public class BreezeWindCharge extends ThrowableProjectile {
 
     @Override
     protected void onHitBlock(BlockHitResult result) {
+        if (!level().isClientSide) {
+            BlockPos hitPos = result.getBlockPos();
+            WindChargeBlockInteraction.apply((ServerLevel) level(), hitPos, getOwner(), true);
+        }
         explode();
     }
 

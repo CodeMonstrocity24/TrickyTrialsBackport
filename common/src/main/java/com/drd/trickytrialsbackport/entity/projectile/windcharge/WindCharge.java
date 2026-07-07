@@ -9,6 +9,7 @@ import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.*;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.core.BlockPos;
 
 public class WindCharge extends ThrowableProjectile {
     private static final float EXPLOSION_RADIUS = 1.2F;
@@ -67,6 +68,10 @@ public class WindCharge extends ThrowableProjectile {
     @Override
     protected void onHitBlock(BlockHitResult result) {
         super.onHitBlock(result);
+        if (!level().isClientSide) {
+            BlockPos hitPos = result.getBlockPos();
+            WindChargeBlockInteraction.apply((ServerLevel) level(), hitPos, getOwner(), false);
+        }
         explode();
     }
 
