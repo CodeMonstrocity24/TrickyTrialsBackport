@@ -25,7 +25,14 @@ public class BreezeAttackEntitySensor extends NearestLivingEntitySensor<Breeze> 
     protected void doTick(ServerLevel p_310391_, Breeze p_312097_) {
         super.doTick(p_310391_, p_312097_);
         p_312097_.getBrain().getMemory(MemoryModuleType.NEAREST_LIVING_ENTITIES).stream().flatMap(Collection::stream).filter((p_311534_) -> {
-            return Sensor.isEntityAttackable(p_312097_, p_311534_);
+            return !(p_311534_ instanceof Breeze)
+                    && !(p_311534_ instanceof net.minecraft.world.entity.monster.Zombie)
+                    && !(p_311534_ instanceof net.minecraft.world.entity.monster.AbstractSkeleton)
+                    && !(p_311534_ instanceof com.drd.trickytrialsbackport.entity.monster.ModAbstractSkeleton)
+                    && !(p_311534_ instanceof net.minecraft.world.entity.monster.Spider)
+                    && !(p_311534_ instanceof net.minecraft.world.entity.monster.Silverfish)
+                    && !(p_311534_ instanceof net.minecraft.world.entity.monster.Slime)
+                    && Sensor.isEntityAttackable(p_312097_, p_311534_);
         }).findFirst().ifPresentOrElse((p_310804_) -> {
             p_312097_.getBrain().setMemory(MemoryModuleType.NEAREST_ATTACKABLE, p_310804_);
         }, () -> {

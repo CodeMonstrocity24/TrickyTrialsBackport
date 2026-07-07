@@ -59,7 +59,7 @@ public abstract class ModAbstractSkeleton extends Monster implements RangedAttac
         this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 1.0));
         this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 8.0F));
         this.goalSelector.addGoal(6, new RandomLookAroundGoal(this));
-        this.targetSelector.addGoal(1, new HurtByTargetGoal(this, new Class[0]));
+        this.targetSelector.addGoal(1, new BreezeIgnoringHurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, Player.class, true));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal(this, IronGolem.class, true));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal(this, Turtle.class, 10, true, false, Turtle.BABY_ON_LAND_SELECTOR));
@@ -201,5 +201,19 @@ public abstract class ModAbstractSkeleton extends Monster implements RangedAttac
 
     public boolean isShaking() {
         return this.isFullyFrozen();
+    }
+
+    static class BreezeIgnoringHurtByTargetGoal extends HurtByTargetGoal {
+        public BreezeIgnoringHurtByTargetGoal(net.minecraft.world.entity.PathfinderMob mob) {
+            super(mob);
+        }
+
+        @Override
+        public boolean canUse() {
+            if (this.mob.getLastHurtByMob() instanceof com.drd.trickytrialsbackport.entity.monster.breeze.Breeze) {
+                return false;
+            }
+            return super.canUse();
+        }
     }
 }
