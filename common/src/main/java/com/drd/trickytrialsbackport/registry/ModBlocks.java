@@ -96,7 +96,8 @@ public class ModBlocks {
         POLISHED_TUFF_WALL = registerWall("polished_tuff", POLISHED_TUFF);
         TRIAL_SPAWNER = helper.registerAuto(Registries.BLOCK, "trial_spawner", () -> new TrialSpawnerBlock(BlockBehaviour.Properties.of()
                 .mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().lightLevel(light -> light.getValue(TrialSpawnerBlock.STATE).lightLevel())
-                .sound(ModSoundTypes.TRIAL_SPAWNER).isViewBlocking(ModBlocks::never).noOcclusion()));
+                .sound(ModSoundTypes.TRIAL_SPAWNER).isViewBlocking(ModBlocks::never).noOcclusion()
+                .strength(50.0F)));
         TUFF_BRICKS = registerBlockWithItem("tuff_bricks",
                 () -> new Block(BlockBehaviour.Properties.copy(Blocks.TUFF).sound(ModSoundTypes.TUFF_BRICKS)));
         TUFF_BRICK_SLAB = registerSlab("tuff_brick", TUFF_BRICKS);
