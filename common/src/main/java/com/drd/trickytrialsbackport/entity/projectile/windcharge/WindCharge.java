@@ -40,11 +40,6 @@ public class WindCharge extends ThrowableProjectile {
             noDeflectTicks--;
         }
 
-        if (!appliedRecoil) {
-            applyRecoil();
-            appliedRecoil = true;
-        }
-
         if (noFallTicks > 0 && getOwner() instanceof LivingEntity living) {
             noFallTicks--;
             living.fallDistance = 0.0F;
@@ -68,10 +63,6 @@ public class WindCharge extends ThrowableProjectile {
     @Override
     protected void onHitBlock(BlockHitResult result) {
         super.onHitBlock(result);
-        if (!level().isClientSide) {
-            BlockPos hitPos = result.getBlockPos();
-            WindChargeBlockInteraction.apply((ServerLevel) level(), hitPos, getOwner(), false);
-        }
         explode();
     }
 
@@ -97,37 +88,13 @@ public class WindCharge extends ThrowableProjectile {
                     1.0F,
                     1.0F
             );
+            
+            WindChargeBlockInteraction.burst(server, position(), 2.4D, getOwner(), false);
 
             exploded = true;
             setDeltaMovement(Vec3.ZERO);
             setNoGravity(true);
         }
-    }
-
-    private void applyRecoil() {
-        Entity owner = getOwner();
-        if (!(owner instanceof LivingEntity living)) return;
-
-        Vec3 look = living.getLookAngle();
-
-        double backward = 0.5;
-        double upward = 0.9;
-
-        if (this.random.nextFloat() < 0.05F) {
-            upward = 1.6;
-        }
-
-        living.push(-look.x * backward, 0, -look.z * backward);
-
-        Vec3 motion = living.getDeltaMovement();
-        if (motion.y < upward) {
-            living.setDeltaMovement(motion.x, upward, motion.z);
-        }
-
-        this.noFallTicks = 32;
-        living.fallDistance = 0.0F;
-
-        living.hurtMarked = true;
     }
 
     @Override

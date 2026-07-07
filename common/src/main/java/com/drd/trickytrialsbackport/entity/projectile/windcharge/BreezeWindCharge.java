@@ -104,10 +104,6 @@ public class BreezeWindCharge extends ThrowableProjectile {
 
     @Override
     protected void onHitBlock(BlockHitResult result) {
-        if (!level().isClientSide) {
-            BlockPos hitPos = result.getBlockPos();
-            WindChargeBlockInteraction.apply((ServerLevel) level(), hitPos, getOwner(), true);
-        }
         explode();
     }
 
@@ -155,6 +151,8 @@ public class BreezeWindCharge extends ThrowableProjectile {
                 target.push(push.x, Math.max(push.y, 0.35), push.z);
                 target.hurtMarked = true;
             }
+
+            WindChargeBlockInteraction.burst(server, position(), 6.0D, getOwner(), true);
 
             exploded = true;
             setDeltaMovement(Vec3.ZERO);

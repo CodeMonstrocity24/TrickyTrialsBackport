@@ -102,32 +102,38 @@ public final class WindChargeBlockInteraction {
     }
 
     /**
-     * Full wind-charge burst: knock back nearby entities and interact with nearby
-     * interactable blocks within the given radius. Entities are pushed away from
-     * center (including the owner if they're in range).
+     * Full wind-charge burst: knocks back all living entities in the radius and
+     * applies block interactions to every interactable block in that radius.
+     * Radius differs by source (vanilla: ~2.4 for player/dispenser, ~6.0 for breeze).
      */
-    public static void burst(ServerLevel level, Vec3 center, double radius, Entity source, boolean fromBreeze) {
-        // Entity knockback
+    public static void burst(ServerLevel level, net.minecraft.world.phys.Vec3 center,
+                             double radius, Entity source, boolean fromBreeze) {
+        // Entity knockback (no damage).
         net.minecraft.world.phys.AABB box = new net.minecraft.world.phys.AABB(
                 center.x - radius, center.y - radius, center.z - radius,
                 center.x + radius, center.y + radius, center.z + radius);
-        for (net.minecraft.world.entity.LivingEntity e :
-                level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, box)) {
-            double dist = e.position().distanceTo(center);
+        for (net.minecraft.world.entity.LivingEntity living :
+                level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, box,
+                        e -> !(source instanceof com.drd.trickytrialsbackport.entity.monster.breeze.Breeze && e == source))) {
+            double dist = living.position().distanceTo(center);
             if (dist > radius) continue;
-            double strength = (1.0 - dist / radius) * 1.2;
-            Vec3 push = e.position().subtract(center);
-            if (push.lengthSqr() < 1.0E-4) {
-                push = new Vec3(0.0, 1.0, 0.0);
+            double falloff = 1.0 - dist / radius;
+            net.minecraft.world.phys.Vec3 dir = living.position().subtract(center);
+            if (dir.lengthSqr() < 1.0E-4) {
+                dir = new net.minecraft.world.phys.Vec3(0.0, 1.0, 0.0);
             }
-            push = push.normalize().scale(strength);
-            e.push(push.x, Math.max(push.y, 0.35), push.z);
-            e.hurtMarked = true;
+            dir = dir.normalize();
+
+            // Horizontal push (from strength), vertical launch (independent).
+            double horizontal = falloff * 0.95;
+            double upward = falloff * 1.13 + 0.13;
+            living.push(dir.x * horizontal, upward, dir.z * horizontal);
+            living.hurtMarked = true;
         }
 
-        // Block interactions within the burst radius
-        int r = (int) Math.ceil(radius);
+        // Block interaction across the burst radius.
         BlockPos centerPos = BlockPos.containing(center.x, center.y, center.z);
+        int r = (int) Math.ceil(radius);
         for (BlockPos pos : BlockPos.betweenClosed(
                 centerPos.offset(-r, -r, -r), centerPos.offset(r, r, r))) {
             if (pos.getCenter().distanceTo(center) <= radius) {
