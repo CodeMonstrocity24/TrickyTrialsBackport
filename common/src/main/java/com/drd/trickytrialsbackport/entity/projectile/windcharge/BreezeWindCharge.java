@@ -133,6 +133,24 @@ public class BreezeWindCharge extends ThrowableProjectile {
                     1.0F
             );
 
+            Vec3 center = position();
+            double radius = 3.5;
+            for (LivingEntity target : level().getEntitiesOfClass(
+                    LivingEntity.class,
+                    getBoundingBox().inflate(radius),
+                    e -> e != getOwner())) {
+                double dist = target.position().distanceTo(center);
+                if (dist > radius) continue;
+                double strength = (1.0 - dist / radius) * 1.2;
+                Vec3 push = target.position().subtract(center);
+                if (push.lengthSqr() < 1.0E-4) {
+                    push = new Vec3(0.0, 1.0, 0.0);
+                }
+                push = push.normalize().scale(strength);
+                target.push(push.x, Math.max(push.y, 0.35), push.z);
+                target.hurtMarked = true;
+            }
+
             exploded = true;
             setDeltaMovement(Vec3.ZERO);
             setNoGravity(true);
