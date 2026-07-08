@@ -9,7 +9,8 @@
   "mixins": [
     "BoggedMixin",
     "RaiderMixin",
-    "ServerPlayerMixin"
+    "ServerPlayerMixin",
+    "HurtByTargetGoalMixin"
   ],
   "injectors": {
     "defaultRequire": 1
