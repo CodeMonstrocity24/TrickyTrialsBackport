@@ -165,18 +165,16 @@ public class TrialSpawnerBlockEntity extends BlockEntity implements Spawner, Tri
 
         TrialSpawnerData data = be.trialSpawner.getData();
 
-        if (!data.detectedPlayers.isEmpty()) {
+        TrialSpawnerState spawnerState = be.trialSpawner.getState();
+
+        if (!data.detectedPlayers.isEmpty()
+                && spawnerState != TrialSpawnerState.COOLDOWN
+                && spawnerState != TrialSpawnerState.EJECTING_REWARD
+                && spawnerState != TrialSpawnerState.WAITING_FOR_REWARD_EJECTION) {
             SoundEvent sound = ModSounds.TRIAL_SPAWNER_DETECT_PLAYER.get();
 
             if (level.getGameTime() % 20 == 0) {
-                level.playSound(
-                        null,
-                        pos,
-                        sound,
-                        SoundSource.BLOCKS,
-                        1.0F,
-                        1.0F
-                );
+                level.playSound(null, pos, sound, SoundSource.BLOCKS, 1.0F, 1.0F);
             }
         }
     }

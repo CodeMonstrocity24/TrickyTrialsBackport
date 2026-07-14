@@ -154,9 +154,15 @@ public class TrialSpawnerData {
         return this.currentMobs.isEmpty();
     }
 
+    public boolean isTrialComplete(TrialSpawnerConfig config, int additionalPlayers) {
+        return this.totalMobsSpawned >= config.calculateTargetTotalMobs(additionalPlayers)
+                && this.currentMobs.isEmpty();
+    }
+
     public boolean isReadyToSpawnNextMob(ServerLevel level, TrialSpawnerConfig config, int additionalPlayers) {
         return level.getGameTime() >= this.nextMobSpawnsAt
-                && this.mobsSpawnedThisWave < this.targetMobsThisWave;
+                && this.currentMobs.size() < config.calculateTargetSimultaneousMobs(additionalPlayers)
+                && this.totalMobsSpawned < config.calculateTargetTotalMobs(additionalPlayers);
     }
 
     public int countAdditionalPlayers(BlockPos pos) {
